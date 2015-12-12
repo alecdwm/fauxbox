@@ -6,7 +6,7 @@ APP = $(FAUXPATH)/fauxbox.app
 
 .phony: all-osx
 
-all-osx: clean-osx build-osx run-osx
+all-osx: clean-osx build-osx run-osx-dev
 
 clean-osx:
 	@echo "Deleting fauxbox.app"
@@ -19,9 +19,13 @@ build-osx:
 	@mv $(FAUXPATH)/fauxbox $(APP)/Contents/MacOS/
 	@cp -r $(FAUXPATH)/resources $(APP)/Contents/MacOS/
 
+run-osx-dev:
+	@echo "Running fauxbox.app (dev)"
+	$(APP)/Contents/MacOS/fauxbox
+
 run-osx:
 	@echo "Running fauxbox.app"
-	@open $(APP)
+	open $(APP)
 
 # build-osx-to-windows:
 # 	CGO_ENABLED=1 \
