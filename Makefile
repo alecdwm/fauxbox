@@ -1,31 +1,39 @@
+################################################################################
 # Note:
 # This Makefile is only intended to work within an OS X environment. (for now)
 
 FAUXPATH = $(GOPATH)/src/go.owls.io/fauxbox
-APP = $(FAUXPATH)/fauxbox.app
 
-.phony: all-osx
+OSXAPP = $(FAUXPATH)/fauxbox.app
 
-all-osx: clean-osx build-osx run-osx-dev
+################################################################################
+osx-dev: clean-osx build-osx run-osx-dev
+
+osx: clean-osx build-osx run-osx
 
 clean-osx:
 	@echo "Deleting fauxbox.app"
-	@$(shell if [ -d $(APP) ]; then rm -r $(APP); fi)
+	@$(shell if [ -d $(OSXAPP) ]; then rm -r $(OSXAPP); fi)
 
 build-osx:
 	@echo "Building fauxbox.app"
 	@go build go.owls.io/fauxbox
-	@mkdir -p $(APP)/Contents/MacOS
-	@mv $(FAUXPATH)/fauxbox $(APP)/Contents/MacOS/
-	@cp -r $(FAUXPATH)/resources $(APP)/Contents/MacOS/
+	@mkdir -p $(OSXAPP)/Contents/MacOS
+	@mv $(FAUXPATH)/fauxbox $(OSXAPP)/Contents/MacOS/
+	@cp -r $(FAUXPATH)/resources $(OSXAPP)/Contents/MacOS/
+	@cp -r $(FAUXPATH)/models $(OSXAPP)/Contents/MacOS/
 
 run-osx-dev:
 	@echo "Running fauxbox.app (dev)"
-	$(APP)/Contents/MacOS/fauxbox
+	$(OSXAPP)/Contents/MacOS/fauxbox
 
 run-osx:
 	@echo "Running fauxbox.app"
-	open $(APP)
+	open $(OSXAPP)
+
+build-osx-windows:
+	@echo "Building fauxbox.exe"
+	@GOOS=windows GOARCH=amd64 go build go.owls.io/fauxbox
 
 # build-osx-to-windows:
 # 	CGO_ENABLED=1 \
@@ -52,3 +60,38 @@ run-osx:
 
 # build-game-windows:
 # 	CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -ldflags="-extld=$CC"
+
+
+################################################################################
+win-dev: clean-win build-win run-win-dev
+
+win: clean-win build-win run-win
+
+clean-win:
+	@echo "Deleting fauxbox.exe"
+
+build-win:
+	@echo "Building fauxbox.exe"
+
+run-win-dev:
+	@echo "Running fauxbox.exe (dev)"
+
+run-win:
+	@echo "Running fauxbox.exe"
+
+################################################################################
+lin-dev: clean-lin build-lin run-lin-dev
+
+lin: clean-lin build-lin run-lin
+
+clean-lin:
+	@echo "Deleting fauxbox"
+
+build-lin:
+	@echo "Building fauxbox"
+
+run-lin-dev:
+	@echo "Running fauxbox (dev)"
+
+run-lin:
+	@echo "Running fauxbox"

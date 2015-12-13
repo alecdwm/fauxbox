@@ -12,6 +12,8 @@ import (
 	"github.com/dradtke/go-allegro/allegro/font"
 	"github.com/dradtke/go-allegro/allegro/image"
 	"github.com/dradtke/go-allegro/allegro/primitives"
+	"github.com/gazed/vu"
+	"github.com/gazed/vu/math/lin"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/kardianos/osext"
 )
@@ -63,18 +65,18 @@ func (bullets *Bullets) update(dt float64) {
 			continue
 		}
 
-		// if bullets[i].pos.X() < 0 {
-		// 	bullets[i].pos = mgl64.Vec2{float64(display.Width()), bullets[i].pos.Y()}
-		// }
-		// if bullets[i].pos.Y() < 0 {
-		// 	bullets[i].pos = mgl64.Vec2{bullets[i].pos.X(), float64(display.Height())}
-		// }
-		// if bullets[i].pos.X() > float64(display.Width()) {
-		// 	bullets[i].pos = mgl64.Vec2{0.0, bullets[i].pos.Y()}
-		// }
-		// if bullets[i].pos.Y() > float64(display.Height()) {
-		// 	bullets[i].pos = mgl64.Vec2{bullets[i].pos.X(), 0.0}
-		// }
+		if bullets[i].pos.X() < 0 {
+			bullets[i].pos = mgl64.Vec2{float64(width), bullets[i].pos.Y()}
+		}
+		if bullets[i].pos.Y() < 0 {
+			bullets[i].pos = mgl64.Vec2{bullets[i].pos.X(), float64(height)}
+		}
+		if bullets[i].pos.X() > float64(width) {
+			bullets[i].pos = mgl64.Vec2{0.0, bullets[i].pos.Y()}
+		}
+		if bullets[i].pos.Y() > float64(height) {
+			bullets[i].pos = mgl64.Vec2{bullets[i].pos.X(), 0.0}
+		}
 
 		bullets[i].pos = bullets[i].pos.Add(bullets[i].vel.Mul(dt))
 	}
@@ -140,7 +142,6 @@ func (mc *MouseCannon) draw(dt float64) {
 
 var (
 	running bool = true
-	display *allegro.Display
 
 	defaultFont *font.Font
 	alecdwm     *allegro.Bitmap // this stuff will soon be split into objects not globals
@@ -152,6 +153,9 @@ var (
 	UP    bool
 	DOWN  bool
 	fps   float64
+
+	width  int
+	height int
 
 	worldBullets Bullets
 	mouseCannon  MouseCannon
@@ -270,7 +274,68 @@ func endGame() {
 }
 
 func main() {
-	allegro.Run(game) // Run allegro
+	// allegro.Run(game) // Run allegro
+
+	fauxbox := &FauxBox{}
+	if err := vu.New(fauxbox, "fauxbox", 0, 0, 800, 600); err != nil {
+		logrus.WithError(err).Error("Error in fauxbox")
+	}
+}
+
+type FauxBox struct {
+	world      vu.Pov
+	cam2d      vu.Camera
+	sphere     vu.Pov
+	fpsCounter vu.Pov
+}
+
+func (f *FauxBox) Create(eng vu.Eng, s *vu.State) {
+	eng.SetColor(0.15, 0.15, 0.15, 1)
+
+	f.world = eng.Root().NewPov()
+
+	f.cam2d = f.world.NewCam()
+	// f.cam2d.SetOrthographic(-30.0, 30.0, -30.0, 30.0, 0.001, 1000.0)
+	f.cam2d.SetOrthographic(float64(-s.W)/2.0, float64(s.W)/2.0, -float64(s.H)/2.0, float64(s.H)/2.0, 0.001, 1000.0)
+	f.cam2d.SetLocation(0.0, 0.0, 10.0)
+
+	f.sphere = f.world.NewPov().SetLocation(0, 0, 0)
+	f.sphere.NewModel("solid").LoadMesh("box").LoadMat("red")
+	f.sphere.SetVisible(true)
+	f.sphere.SetScale(100, 100, 1)
+
+	f.fpsCounter = f.world.NewPov().SetLocation(0, 0, 1)
+}
+
+func (f *FauxBox) Update(eng vu.Eng, i *vu.Input, s *vu.State) {
+	if i.Down[vu.K_Q] > 0 {
+		eng.Shutdown()
+	}
+
+	if i.Down[vu.K_Lm] > 0 {
+		fmt.Println(i.Down[vu.K_Lm], i.Mx, i.My)
+	}
+
+	playerSpeed := 250.0 //pixels/second
+
+	if i.Down[vu.K_W] > 0 {
+		f.sphere.Move(0, -playerSpeed*i.Dt, 0, lin.NewQ())
+		// f.sphere.Move(0, -playerSpeed, 0, lin.NewQ())
+	}
+	if i.Down[vu.K_A] > 0 {
+		f.sphere.Move(playerSpeed*i.Dt, 0, 0, lin.NewQ())
+		// f.sphere.Move(playerSpeed, 0, 0, lin.NewQ())
+	}
+	if i.Down[vu.K_S] > 0 {
+		f.sphere.Move(0, playerSpeed*i.Dt, 0, lin.NewQ())
+		// f.sphere.Move(0, playerSpeed, 0, lin.NewQ())
+	}
+	if i.Down[vu.K_D] > 0 {
+		f.sphere.Move(-playerSpeed*i.Dt, 0, 0, lin.NewQ())
+		// f.sphere.Move(-playerSpeed, 0, 0, lin.NewQ())
+	}
+	// fmt.Println("Updated!")
+	// eng.Shutdown()
 }
 
 func game() {
@@ -297,6 +362,9 @@ func game() {
 		logrus.WithError(err).Error("Creating allegro display")
 	}
 	defer display.Destroy()
+
+	width = display.Width()
+	height = display.Height()
 
 	// CONFIGURE CONTEXT
 	display.SetWindowTitle("Fauxbox") // set a title
