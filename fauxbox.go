@@ -236,17 +236,31 @@ func processEvent(event interface{}) {
 
 func update(dt float64) {
 	fps = dt
+	speed := float64(50) // px/second
 	if UP && !DOWN {
-		y -= 50 * dt
-	}
-	if LEFT && !RIGHT {
-		x -= 50 * dt
-	}
-	if RIGHT && !LEFT {
-		x += 50 * dt
-	}
-	if DOWN && !UP {
-		y += 50 * dt
+		if LEFT && !RIGHT {
+			y -= (speed / 2) * dt
+			x -= (speed / 2) * dt
+		} else if RIGHT && !LEFT {
+			y -= (speed / 2) * dt
+			x += (speed / 2) * dt
+		} else {
+			y -= speed * dt
+		}
+	} else if DOWN && !UP {
+		if LEFT && !RIGHT {
+			y += (speed / 2) * dt
+			x -= (speed / 2) * dt
+		} else if RIGHT && !LEFT {
+			y += (speed / 2) * dt
+			x += (speed / 2) * dt
+		} else {
+			y += speed * dt
+		}
+	} else if LEFT && !RIGHT {
+		x -= speed * dt
+	} else if RIGHT && !LEFT {
+		x += speed * dt
 	}
 
 	worldBullets.update(dt)
