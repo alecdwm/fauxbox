@@ -285,6 +285,8 @@ func main() {
 type FauxBox struct {
 	world      vu.Pov
 	cam2d      vu.Camera
+	ui         vu.Pov
+	camUi      vu.Camera
 	sphere     vu.Pov
 	fpsCounter vu.Pov
 }
@@ -299,12 +301,26 @@ func (f *FauxBox) Create(eng vu.Eng, s *vu.State) {
 	f.cam2d.SetOrthographic(float64(-s.W)/2.0, float64(s.W)/2.0, -float64(s.H)/2.0, float64(s.H)/2.0, 0.001, 1000.0)
 	f.cam2d.SetLocation(0.0, 0.0, 10.0)
 
+	f.ui = eng.Root().NewPov()
+	f.camUi = f.ui.NewCam()
+	f.camUi.SetUI()
+	f.camUi.SetOrthographic(0, float64(s.W), 0, float64(s.H), 0, 10)
+
 	f.sphere = f.world.NewPov().SetLocation(0, 0, 0)
 	f.sphere.NewModel("solid").LoadMesh("box").LoadMat("red")
-	f.sphere.SetVisible(true)
 	f.sphere.SetScale(100, 100, 1)
 
-	f.fpsCounter = f.world.NewPov().SetLocation(0, 0, 1)
+	square := f.world.NewPov().SetLocation(-100, 0, 0)
+	square.NewModel("solid").LoadMesh("square").LoadMat("square")
+	square.SetScale(100, 100, 1)
+
+	circle := f.world.NewPov().SetLocation(100, 0, 0)
+	circle.NewModel("solid").LoadMesh("circle").LoadMat("circle")
+	circle.SetScale(100, 100, 1)
+
+	font := "lucidiaSu18"
+	f.fpsCounter = f.ui.NewPov().SetLocation(10, 10, 0)
+	f.fpsCounter.NewModel("uv").AddTex(font + "White").LoadFont(font).SetPhrase("FPS: ")
 }
 
 func (f *FauxBox) Update(eng vu.Eng, i *vu.Input, s *vu.State) {
@@ -316,6 +332,10 @@ func (f *FauxBox) Update(eng vu.Eng, i *vu.Input, s *vu.State) {
 		fmt.Println(i.Down[vu.K_Lm], i.Mx, i.My)
 	}
 
+	if f.fpsCounter.Model() != nil {
+		f.fpsCounter.Model().SetPhrase(fmt.Sprintf("FPS: %.1f",
+			float64(eng.Usage().Renders)/eng.Usage().Elapsed.Seconds()))
+	}
 	playerSpeed := 250.0 //pixels/second
 
 	if i.Down[vu.K_W] > 0 {

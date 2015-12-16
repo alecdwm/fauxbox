@@ -20,8 +20,10 @@ build-osx:
 	@go build go.owls.io/fauxbox
 	@mkdir -p $(OSXAPP)/Contents/MacOS
 	@mv $(FAUXPATH)/fauxbox $(OSXAPP)/Contents/MacOS/
-	@cp -r $(FAUXPATH)/resources $(OSXAPP)/Contents/MacOS/
+	@cp -r $(FAUXPATH)/images $(OSXAPP)/Contents/MacOS/
 	@cp -r $(FAUXPATH)/models $(OSXAPP)/Contents/MacOS/
+	@cp -r $(FAUXPATH)/resources $(OSXAPP)/Contents/MacOS/
+	@cp -r $(FAUXPATH)/source $(OSXAPP)/Contents/MacOS/
 
 run-osx-dev:
 	@echo "Running fauxbox.app (dev)"
