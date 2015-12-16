@@ -143,7 +143,7 @@ var (
 	running bool = true
 
 	defaultFont *font.Font
-	alecdwm     *allegro.Bitmap // this stuff will soon be split into objects not globals
+	fauxboximg  *allegro.Bitmap // this stuff will soon be split into objects not globals
 
 	x     float64
 	y     float64
@@ -174,7 +174,7 @@ func load() {
 	}
 
 	// IMAGES
-	alecdwm, err = allegro.LoadBitmap(resPath + "/alecdwm.jpg")
+	fauxboximg, err = allegro.LoadBitmap(resPath + "/fauxbox.tga")
 	if err != nil {
 		logrus.WithError(err).Error("Loading bitmap")
 	}
@@ -255,7 +255,7 @@ func update(dt float64) {
 func draw(dt float64) {
 	allegro.ClearToColor(allegro.MapRGB(0, 0, 0))
 
-	alecdwm.Draw(200, 200, allegro.FLIP_NONE)
+	fauxboximg.Draw(200, 200, allegro.FLIP_NONE)
 	primitives.DrawCircle(primitives.Point{float32(x), float32(y)}, 20.0, allegro.MapRGB(255, 255, 255), 2.0)
 
 	worldBullets.draw(dt)
