@@ -10,10 +10,9 @@ import (
 	"github.com/dradtke/go-allegro/allegro/audio"
 	"github.com/dradtke/go-allegro/allegro/dialog"
 	"github.com/dradtke/go-allegro/allegro/font"
+	"github.com/dradtke/go-allegro/allegro/font/ttf"
 	"github.com/dradtke/go-allegro/allegro/image"
 	"github.com/dradtke/go-allegro/allegro/primitives"
-	"github.com/gazed/vu"
-	"github.com/gazed/vu/math/lin"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/kardianos/osext"
 )
@@ -169,8 +168,7 @@ func load() {
 	resPath := execPath + "/resources"
 
 	// FONTS
-	// defaultFont, err = font.LoadFont(resPath+"/8bitwonder.ttf", 18, 0)
-	defaultFont, err = font.Builtin()
+	defaultFont, err = font.LoadFont(resPath+"/Neuropol.ttf", 18, 0)
 	if err != nil {
 		logrus.WithError(err).Error("Loading font")
 	}
@@ -274,88 +272,7 @@ func endGame() {
 }
 
 func main() {
-	// allegro.Run(game) // Run allegro
-
-	fauxbox := &FauxBox{}
-	if err := vu.New(fauxbox, "fauxbox", 0, 0, 800, 600); err != nil {
-		logrus.WithError(err).Error("Error in fauxbox")
-	}
-}
-
-type FauxBox struct {
-	world      vu.Pov
-	cam2d      vu.Camera
-	ui         vu.Pov
-	camUi      vu.Camera
-	sphere     vu.Pov
-	fpsCounter vu.Pov
-}
-
-func (f *FauxBox) Create(eng vu.Eng, s *vu.State) {
-	eng.SetColor(0.15, 0.15, 0.15, 1)
-
-	f.world = eng.Root().NewPov()
-
-	f.cam2d = f.world.NewCam()
-	// f.cam2d.SetOrthographic(-30.0, 30.0, -30.0, 30.0, 0.001, 1000.0)
-	f.cam2d.SetOrthographic(float64(-s.W)/2.0, float64(s.W)/2.0, -float64(s.H)/2.0, float64(s.H)/2.0, 0.001, 1000.0)
-	f.cam2d.SetLocation(0.0, 0.0, 10.0)
-
-	f.ui = eng.Root().NewPov()
-	f.camUi = f.ui.NewCam()
-	f.camUi.SetUI()
-	f.camUi.SetOrthographic(0, float64(s.W), 0, float64(s.H), 0, 10)
-
-	f.sphere = f.world.NewPov().SetLocation(0, 0, 0)
-	f.sphere.NewModel("solid").LoadMesh("box").LoadMat("red")
-	f.sphere.SetScale(100, 100, 1)
-
-	square := f.world.NewPov().SetLocation(-100, 0, 0)
-	square.NewModel("solid").LoadMesh("square").LoadMat("square")
-	square.SetScale(100, 100, 1)
-
-	circle := f.world.NewPov().SetLocation(100, 0, 0)
-	circle.NewModel("solid").LoadMesh("circle").LoadMat("circle")
-	circle.SetScale(100, 100, 1)
-
-	font := "lucidiaSu18"
-	f.fpsCounter = f.ui.NewPov().SetLocation(10, 10, 0)
-	f.fpsCounter.NewModel("uv").AddTex(font + "White").LoadFont(font).SetPhrase("FPS: ")
-}
-
-func (f *FauxBox) Update(eng vu.Eng, i *vu.Input, s *vu.State) {
-	if i.Down[vu.K_Q] > 0 {
-		eng.Shutdown()
-	}
-
-	if i.Down[vu.K_Lm] > 0 {
-		fmt.Println(i.Down[vu.K_Lm], i.Mx, i.My)
-	}
-
-	if f.fpsCounter.Model() != nil {
-		f.fpsCounter.Model().SetPhrase(fmt.Sprintf("FPS: %.1f",
-			float64(eng.Usage().Renders)/eng.Usage().Elapsed.Seconds()))
-	}
-	playerSpeed := 250.0 //pixels/second
-
-	if i.Down[vu.K_W] > 0 {
-		f.sphere.Move(0, -playerSpeed*i.Dt, 0, lin.NewQ())
-		// f.sphere.Move(0, -playerSpeed, 0, lin.NewQ())
-	}
-	if i.Down[vu.K_A] > 0 {
-		f.sphere.Move(playerSpeed*i.Dt, 0, 0, lin.NewQ())
-		// f.sphere.Move(playerSpeed, 0, 0, lin.NewQ())
-	}
-	if i.Down[vu.K_S] > 0 {
-		f.sphere.Move(0, playerSpeed*i.Dt, 0, lin.NewQ())
-		// f.sphere.Move(0, playerSpeed, 0, lin.NewQ())
-	}
-	if i.Down[vu.K_D] > 0 {
-		f.sphere.Move(-playerSpeed*i.Dt, 0, 0, lin.NewQ())
-		// f.sphere.Move(-playerSpeed, 0, 0, lin.NewQ())
-	}
-	// fmt.Println("Updated!")
-	// eng.Shutdown()
+	allegro.Run(game) // Run allegro
 }
 
 func game() {
@@ -370,6 +287,7 @@ func game() {
 	font.Install()       // lets us load fonts from popular file formats
 	image.Install()      // lets us load bitmap images from popular file formats
 	primitives.Install() // lets us use some 2d graphics primitives
+	ttf.Install()        // lets us use true type fonts
 
 	// LOAD RESOURCES
 	load()
