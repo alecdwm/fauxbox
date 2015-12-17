@@ -10,8 +10,8 @@ WINDOWSAPP = $(FAUXPATH)/fauxbox.exe
 
 phony:
 	@echo -ne "\033[0;33mAvailable commands:\033[0m\n\n\
+make linux\n\
 make osx[-dev]\n\
-make linux[-dev]\n\
 make windows[-dev] (not configured)\n"
 
 clean: clean-osx clean-linux clean-windows
@@ -48,8 +48,6 @@ build-osx-windows:
 	@GOOS=windows GOARCH=amd64 go build go.owls.io/fauxbox
 
 ################################################################################
-linux-dev: clean-linux build-linux run-linux-dev
-
 linux: clean-linux build-linux run-linux
 
 clean-linux:

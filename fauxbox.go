@@ -161,6 +161,15 @@ var (
 )
 
 func load() {
+	loadingDialog, err := dialog.OpenNativeTextLog("Loading Resources",
+		dialog.TEXTLOG_NO_CLOSE|dialog.TEXTLOG_MONOSPACE)
+	if err != nil {
+		logrus.WithError(err).Error("Opening loading textlog")
+	} else {
+		defer loadingDialog.Close()
+	}
+
+	loadingDialog.Appendln("Determining resource path...")
 	execPath, err := osext.ExecutableFolder()
 	if err != nil {
 		logrus.WithError(err).Error("Getting executable's path")
@@ -168,12 +177,14 @@ func load() {
 	resPath := execPath + "/resources"
 
 	// FONTS
+	loadingDialog.Appendln("Loading fonts...")
 	defaultFont, err = font.LoadFont(resPath+"/Neuropol.ttf", 18, 0)
 	if err != nil {
 		logrus.WithError(err).Error("Loading font")
 	}
 
 	// IMAGES
+	loadingDialog.Appendln("Loading bitmaps...")
 	fauxboximg, err = allegro.LoadBitmap(resPath + "/fauxbox.tga")
 	if err != nil {
 		logrus.WithError(err).Error("Loading bitmap")
