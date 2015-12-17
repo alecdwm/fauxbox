@@ -1,6 +1,8 @@
 package game
 
 import (
+	"math"
+
 	"github.com/dradtke/go-allegro/allegro"
 	"github.com/dradtke/go-allegro/allegro/primitives"
 	"go.owls.io/fauxbox/engine"
@@ -59,21 +61,21 @@ func (p *Player) ProcessEvent(event interface{}) {
 func (p *Player) Update(dt float64) {
 	if p.UP && !p.DOWN {
 		if p.LEFT && !p.RIGHT {
-			p.y -= (p.speed / 2) * dt
-			p.x -= (p.speed / 2) * dt
+			p.y -= p.speed * math.Cos(45) * dt
+			p.x -= p.speed * math.Cos(45) * dt
 		} else if p.RIGHT && !p.LEFT {
-			p.y -= (p.speed / 2) * dt
-			p.x += (p.speed / 2) * dt
+			p.y -= p.speed * math.Cos(45) * dt
+			p.x += p.speed * math.Cos(45) * dt
 		} else {
 			p.y -= p.speed * dt
 		}
 	} else if p.DOWN && !p.UP {
 		if p.LEFT && !p.RIGHT {
-			p.y += (p.speed / 2) * dt
-			p.x -= (p.speed / 2) * dt
+			p.y += p.speed * math.Cos(45) * dt
+			p.x -= p.speed * math.Cos(45) * dt
 		} else if p.RIGHT && !p.LEFT {
-			p.y += (p.speed / 2) * dt
-			p.x += (p.speed / 2) * dt
+			p.y += p.speed * math.Cos(45) * dt
+			p.x += p.speed * math.Cos(45) * dt
 		} else {
 			p.y += p.speed * dt
 		}
