@@ -1,10 +1,20 @@
 ################################################################################
 # Note:
-# This Makefile is only intended to work within an OS X environment. (for now)
+# This Makefile is not designed to work within a Windows environment (for now).
 
 FAUXPATH = $(GOPATH)/src/go.owls.io/fauxbox
 
 OSXAPP = $(FAUXPATH)/fauxbox.app
+LINUXAPP = $(FAUXPATH)/fauxbox_linux
+WINDOWSAPP = $(FAUXPATH)/fauxbox.exe
+
+phony:
+	@echo -ne "\033[0;33mAvailable commands:\033[0m\n\n\
+make osx[-dev]\n\
+make linux[-dev]\n\
+make windows[-dev] (not configured)\n"
+
+clean: clean-osx clean-linux clean-windows
 
 ################################################################################
 osx-dev: clean-osx build-osx run-osx-dev
@@ -37,6 +47,42 @@ build-osx-windows:
 	@echo "Building fauxbox.exe"
 	@GOOS=windows GOARCH=amd64 go build go.owls.io/fauxbox
 
+################################################################################
+linux-dev: clean-linux build-linux run-linux-dev
+
+linux: clean-linux build-linux run-linux
+
+clean-linux:
+	@echo "Deleting fauxbox_linux"
+	@$(shell if [ -f $(LINUXAPP) ]; then rm $(LINUXAPP); fi)
+
+build-linux:
+	@echo "Building fauxbox_linux"
+	@go build go.owls.io/fauxbox
+	@mv $(FAUXPATH)/fauxbox $(LINUXAPP)
+	@chmod +x $(LINUXAPP)
+
+run-linux:
+	@echo "Running fauxbox_linux"
+	@$(LINUXAPP)
+
+################################################################################
+windows-dev: clean-windows build-windows run-windows-dev
+
+windows: clean-windows build-windows run-windows
+
+clean-windows:
+	@echo "Deleting fauxbox.exe"
+
+build-windows:
+	@echo "Building fauxbox.exe"
+
+run-windows-dev:
+	@echo "Running fauxbox.exe (dev)"
+
+run-windows:
+	@echo "Running fauxbox.exe"
+
 # build-osx-to-windows:
 # 	CGO_ENABLED=1 \
 # 	CGO_CFLAGS="-I/opt/mingw-w64-1.0-bin_i686-darwin_20120227/include" \
@@ -62,38 +108,3 @@ build-osx-windows:
 
 # build-game-windows:
 # 	CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -ldflags="-extld=$CC"
-
-
-################################################################################
-win-dev: clean-win build-win run-win-dev
-
-win: clean-win build-win run-win
-
-clean-win:
-	@echo "Deleting fauxbox.exe"
-
-build-win:
-	@echo "Building fauxbox.exe"
-
-run-win-dev:
-	@echo "Running fauxbox.exe (dev)"
-
-run-win:
-	@echo "Running fauxbox.exe"
-
-################################################################################
-lin-dev: clean-lin build-lin run-lin-dev
-
-lin: clean-lin build-lin run-lin
-
-clean-lin:
-	@echo "Deleting fauxbox"
-
-build-lin:
-	@echo "Building fauxbox"
-
-run-lin-dev:
-	@echo "Running fauxbox (dev)"
-
-run-lin:
-	@echo "Running fauxbox"
