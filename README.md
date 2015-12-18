@@ -2,6 +2,12 @@
 ![FauxboxLogo](https://raw.githubusercontent.com/alecdwm/fauxbox/master/resources/icons/fauxbox.png)
 
 ## Subdirectories
+ - **Engine**  
+   Game-engine source code, built ontop of SDL2
+
+ - **Game**  
+   Game-specific source code
+
  - **Licenses**  
    Any third-party software/content licenses
 

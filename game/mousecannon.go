@@ -1,9 +1,8 @@
 package game
 
 import (
-	"github.com/dradtke/go-allegro/allegro"
-	"github.com/dradtke/go-allegro/allegro/primitives"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/veandco/go-sdl2/sdl"
 	"go.owls.io/fauxbox/engine"
 )
 
@@ -31,35 +30,43 @@ func init() {
 // CALLBACKS ///////////////////////////////////////////////////////////////////
 ///////////////
 
-func (mc *MouseCannon) ProcessEvent(event interface{}) {
+func (mc *MouseCannon) ProcessEvent(event sdl.Event) {
 	switch e := event.(type) {
-	case allegro.MouseButtonDownEvent:
-		if e.Button() == 1 {
-			mc.arm(mgl64.Vec2{World.CamXInt(e.X()), World.CamYInt(e.Y())})
-		} else if e.Button() == 2 {
-			mc.unarm()
+	case *sdl.MouseButtonEvent:
+		switch e.Type {
+		case sdl.MOUSEBUTTONDOWN:
+			if e.Button == sdl.BUTTON_LEFT {
+				mc.arm(mgl64.Vec2{World.CamXInt32(e.X), World.CamYInt32(e.Y)})
+			} else if e.Button == sdl.BUTTON_RIGHT {
+				mc.unarm()
+			}
+
+		case sdl.MOUSEBUTTONUP:
+			if e.Button == sdl.BUTTON_LEFT {
+				mc.fire(mc.Bullets, mgl64.Vec2{World.CamXInt32(e.X), World.CamYInt32(e.Y)})
+			}
 		}
 
-	case allegro.MouseAxesEvent:
+	case *sdl.MouseMotionEvent:
 		if mc.isArmed() {
-			mc.aim(mgl64.Vec2{World.CamXInt(e.X()), World.CamYInt(e.Y())})
+			mc.aim(mgl64.Vec2{World.CamXInt32(e.X), World.CamYInt32(e.Y)})
 		}
+	}
+}
 
-	case allegro.MouseButtonUpEvent:
-		if e.Button() == 1 {
-			mc.fire(mc.Bullets, mgl64.Vec2{World.CamXInt(e.X()), World.CamYInt(e.Y())})
-		}
+func (mc *MouseCannon) Update(dt float64) {
+	if mc.armed {
+		x, y, _ := sdl.GetMouseState()
+		mc.aim(mgl64.Vec2{World.CamXInt(x), World.CamYInt(y)})
 	}
 }
 
 func (mc *MouseCannon) Draw(dt float64) {
 	if mc.armed {
-		primitives.DrawLine(
-			primitives.Point{World.X(mc.NextBulletPos.X()), World.Y(mc.NextBulletPos.Y())},
-			primitives.Point{World.X(mc.NextBulletAimPos.X()), World.Y(mc.NextBulletAimPos.Y())},
-			allegro.MapRGB(255, 255, 255),
-			1.0,
-		)
+		engine.Renderer.SetDrawColor(255, 255, 255, 255)
+		engine.Renderer.DrawLine(
+			int(World.X(mc.NextBulletPos.X())), int(World.Y(mc.NextBulletPos.Y())),
+			int(World.X(mc.NextBulletAimPos.X())), int(World.Y(mc.NextBulletAimPos.Y())))
 	}
 }
 

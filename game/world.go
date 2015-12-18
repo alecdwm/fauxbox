@@ -30,7 +30,8 @@ func (w *GameWorld) Update(dt float64) {
 
 func (w *GameWorld) Draw(dt float64) {
 	// Debugging camera location
-	// primitives.DrawCircle(primitives.Point{float32(w.CameraX), float32(w.CameraY)}, 10.0, allegro.MapRGB(255, 0, 255), 2.0)
+	// engine.Renderer.SetDrawColor(255, 0, 255, 255)
+	// engine.Renderer.DrawPoint(int(w.CameraX), int(w.CameraY))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,18 @@ func (w *GameWorld) CamXInt(cameraX int) (worldX float64) {
 
 // Convert screen-space coordinate into world-space coordinate
 func (w *GameWorld) CamYInt(cameraY int) (worldY float64) {
+	worldY = float64(cameraY) + w.CameraY - float64(engine.Height/2)
+	return worldY
+}
+
+// Convert screen-space coordinate into world-space coordinate
+func (w *GameWorld) CamXInt32(cameraX int32) (worldX float64) {
+	worldX = float64(cameraX) + w.CameraX - float64(engine.Width/2)
+	return worldX
+}
+
+// Convert screen-space coordinate into world-space coordinate
+func (w *GameWorld) CamYInt32(cameraY int32) (worldY float64) {
 	worldY = float64(cameraY) + w.CameraY - float64(engine.Height/2)
 	return worldY
 }

@@ -2,9 +2,9 @@ package game
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/dradtke/go-allegro/allegro"
-	"github.com/dradtke/go-allegro/allegro/primitives"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/veandco/go-sdl2/sdl"
+	"go.owls.io/fauxbox/engine"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,11 +59,11 @@ func (mcb *MouseCannonBullets) Draw(dt float64) {
 			continue
 		}
 
-		primitives.DrawFilledCircle(
-			primitives.Point{World.X(mcb.bullets[i].pos.X()), World.Y(mcb.bullets[i].pos.Y())},
-			3.0,
-			allegro.MapRGB(255, 0, 0),
-		)
+		engine.Renderer.SetDrawColor(255, 0, 0, 255)
+		engine.Renderer.DrawRect(&sdl.Rect{
+			int32(World.X(mcb.bullets[i].pos.X())) - 2,
+			int32(World.Y(mcb.bullets[i].pos.Y())) - 2,
+			4, 4})
 	}
 }
 

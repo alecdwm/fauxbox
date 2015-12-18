@@ -2,9 +2,8 @@ package engine
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/dradtke/go-allegro/allegro"
-	"github.com/dradtke/go-allegro/allegro/dialog"
 	"github.com/kardianos/osext"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -12,20 +11,11 @@ import (
 ////////////
 
 type Loader interface {
-	Load(resourcePath string, textLog *dialog.TextLog)
+	Load(resourcePath string)
 }
 
 func load() {
-	// CREATE TEXTLOG
-	textLog, err := dialog.OpenNativeTextLog("Loading Resources",
-		dialog.TEXTLOG_NO_CLOSE|dialog.TEXTLOG_MONOSPACE)
-	if err != nil {
-		logrus.WithError(err).Error("Opening loading textlog")
-	}
-	defer textLog.Close()
-
 	// DETERMINE RESOURCE PATH
-	textLog.Appendln("Determining resource path...")
 	execPath, err := osext.ExecutableFolder()
 	if err != nil {
 		logrus.WithError(err).Error("Getting executable's path")
@@ -35,7 +25,7 @@ func load() {
 	// CALL LOADERS
 	for _, system := range systems {
 		if loader, ok := system.(Loader); ok {
-			loader.Load(resPath, textLog)
+			loader.Load(resPath)
 		}
 	}
 }
@@ -45,11 +35,11 @@ func load() {
 ////////////////////
 
 type EventProcessor interface {
-	ProcessEvent(event interface{})
+	ProcessEvent(event sdl.Event)
 }
 
-func processEvent(event interface{}) {
-	CallEventProcessors := func(event interface{}) {
+func processEvent(event sdl.Event) {
+	CallEventProcessors := func(event sdl.Event) {
 		for _, system := range systems {
 			if eventProcessor, ok := system.(EventProcessor); ok {
 				eventProcessor.ProcessEvent(event)
@@ -57,13 +47,15 @@ func processEvent(event interface{}) {
 		}
 	}
 
-	switch event.(type) {
-	case allegro.DisplayCloseEvent:
+	switch e := event.(type) {
+	case *sdl.QuitEvent:
 		CallEventProcessors(event)
 		EndGame()
 
-	case allegro.DisplayResizeEvent:
-		Resized()
+	case *sdl.WindowEvent:
+		if e.Event == sdl.WINDOWEVENT_RESIZED {
+			Resized()
+		}
 		CallEventProcessors(event)
 
 	default:
@@ -98,7 +90,8 @@ type Drawer interface {
 }
 
 func draw(dt float64) {
-	allegro.ClearToColor(allegro.MapRGB(0, 0, 0))
+	Renderer.SetDrawColor(0, 0, 0, 255)
+	Renderer.Clear()
 
 	for _, system := range systems {
 		if drawer, ok := system.(Drawer); ok {
@@ -106,5 +99,5 @@ func draw(dt float64) {
 		}
 	}
 
-	allegro.FlipDisplay()
+	Renderer.Present()
 }

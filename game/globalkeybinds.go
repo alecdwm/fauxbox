@@ -1,7 +1,7 @@
 package game
 
 import (
-	"github.com/dradtke/go-allegro/allegro"
+	"github.com/veandco/go-sdl2/sdl"
 	"go.owls.io/fauxbox/engine"
 )
 
@@ -19,11 +19,11 @@ func init() {
 // CALLBACKS ///////////////////////////////////////////////////////////////////
 ///////////////
 
-func (gk GlobalKeybinds) ProcessEvent(event interface{}) {
+func (gk GlobalKeybinds) ProcessEvent(event sdl.Event) {
 	switch e := event.(type) {
-	case allegro.KeyDownEvent:
-		switch e.KeyCode() {
-		case allegro.KEY_Q:
+	case *sdl.KeyDownEvent:
+		switch e.Keysym.Sym {
+		case sdl.K_q:
 			engine.EndGame()
 		}
 	}

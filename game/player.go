@@ -3,8 +3,7 @@ package game
 import (
 	"math"
 
-	"github.com/dradtke/go-allegro/allegro"
-	"github.com/dradtke/go-allegro/allegro/primitives"
+	"github.com/veandco/go-sdl2/sdl"
 	"go.owls.io/fauxbox/engine"
 )
 
@@ -30,29 +29,29 @@ func init() {
 // CALLBACKS ///////////////////////////////////////////////////////////////////
 ///////////////
 
-func (p *Player) ProcessEvent(event interface{}) {
+func (p *Player) ProcessEvent(event sdl.Event) {
 	switch e := event.(type) {
-	case allegro.KeyDownEvent:
-		switch e.KeyCode() {
-		case allegro.KEY_W, allegro.KEY_UP:
+	case *sdl.KeyDownEvent:
+		switch e.Keysym.Sym {
+		case sdl.K_w, sdl.K_UP:
 			p.UP = true
-		case allegro.KEY_A, allegro.KEY_LEFT:
+		case sdl.K_a, sdl.K_LEFT:
 			p.LEFT = true
-		case allegro.KEY_S, allegro.KEY_DOWN:
+		case sdl.K_s, sdl.K_DOWN:
 			p.DOWN = true
-		case allegro.KEY_D, allegro.KEY_RIGHT:
+		case sdl.K_d, sdl.K_RIGHT:
 			p.RIGHT = true
 		}
 
-	case allegro.KeyUpEvent:
-		switch e.KeyCode() {
-		case allegro.KEY_W, allegro.KEY_UP:
+	case *sdl.KeyUpEvent:
+		switch e.Keysym.Sym {
+		case sdl.K_w, sdl.K_UP:
 			p.UP = false
-		case allegro.KEY_A, allegro.KEY_LEFT:
+		case sdl.K_a, sdl.K_LEFT:
 			p.LEFT = false
-		case allegro.KEY_S, allegro.KEY_DOWN:
+		case sdl.K_s, sdl.K_DOWN:
 			p.DOWN = false
-		case allegro.KEY_D, allegro.KEY_RIGHT:
+		case sdl.K_d, sdl.K_RIGHT:
 			p.RIGHT = false
 		}
 	}
@@ -90,5 +89,7 @@ func (p *Player) Update(dt float64) {
 }
 
 func (p *Player) Draw(dt float64) {
-	primitives.DrawCircle(primitives.Point{World.X(p.x), World.Y(p.y)}, 20.0, allegro.MapRGB(255, 255, 255), 2.0)
+	engine.Renderer.SetDrawColor(255, 255, 255, 255)
+	engine.Renderer.DrawRect(&sdl.Rect{int32(World.X(p.x)) - 10, int32(World.Y(p.y)) - 10, 20, 20})
+	engine.Renderer.DrawPoint(int(World.X(p.x)), int(World.Y(p.y)))
 }

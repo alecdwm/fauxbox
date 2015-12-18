@@ -2,8 +2,8 @@ package game
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/dradtke/go-allegro/allegro"
-	"github.com/dradtke/go-allegro/allegro/dialog"
+	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/sdl_image"
 	"go.owls.io/fauxbox/engine"
 )
 
@@ -12,7 +12,8 @@ import (
 ////////////
 
 type FauxboxIMG struct {
-	logo *allegro.Bitmap
+	logoTex *sdl.Texture
+	logoObj sdl.Rect
 }
 
 func init() {
@@ -23,16 +24,26 @@ func init() {
 // CALLBACKS ///////////////////////////////////////////////////////////////////
 ///////////////
 
-func (fimg *FauxboxIMG) Load(resPath string, textLog *dialog.TextLog) {
-	var err error
-
+func (fimg *FauxboxIMG) Load(resPath string) {
 	// BITMAPS
-	textLog.Appendln("FauxBoxIMG: Loading bitmaps...")
-	if fimg.logo, err = allegro.LoadBitmap(resPath + "/fauxbox.tga"); err != nil {
+	surface, err := img.Load(resPath + "/fauxbox.tga")
+	if err != nil {
 		logrus.WithError(err).Error("Loading bitmap")
 	}
+
+	if fimg.logoTex, err = engine.Renderer.CreateTextureFromSurface(surface); err != nil {
+		logrus.WithError(err).Error("Texture from surface")
+	}
+	surface.Free()
+
+	fimg.logoObj = sdl.Rect{int32(World.X(200)), int32(World.Y(200)), 256, 256}
+}
+
+func (fimg *FauxboxIMG) Update(dt float64) {
+	fimg.logoObj.X = int32(World.X(200))
+	fimg.logoObj.Y = int32(World.Y(200))
 }
 
 func (fimg *FauxboxIMG) Draw(dt float64) {
-	fimg.logo.Draw(World.X(200), World.Y(200), allegro.FLIP_NONE)
+	engine.Renderer.Copy(fimg.logoTex, nil, &fimg.logoObj)
 }

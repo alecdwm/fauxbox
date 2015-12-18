@@ -1,26 +1,23 @@
 package engine
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/dradtke/go-allegro/allegro"
-	"github.com/dradtke/go-allegro/allegro/audio"
-	"github.com/dradtke/go-allegro/allegro/dialog"
-	"github.com/dradtke/go-allegro/allegro/font"
-	"github.com/dradtke/go-allegro/allegro/font/ttf"
-	"github.com/dradtke/go-allegro/allegro/image"
-	"github.com/dradtke/go-allegro/allegro/primitives"
+	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 var (
 	// Public
-	FPS    float64
-	Width  int
-	Height int
+	FPS      float64
+	Width    int
+	Height   int
+	Window   *sdl.Window
+	Renderer *sdl.Renderer
 
 	// Private
-	display *allegro.Display
 	running bool = true
 )
 
@@ -28,63 +25,45 @@ var (
 // PUBLIC (BEGIN/RESIZE/END) ///////////////////////////////////////////////////
 ///////////////////////////////
 func Fauxbox() {
-	// Initialize allegro features
-	allegro.InstallKeyboard() // keyboard input
-	allegro.InstallMouse()    // mouse input
-	allegro.InstallJoystick() // joystick input
+	// SDL2 is not designed to work across multiple threads
+	runtime.LockOSThread()
 
-	// Initialize allegro addons
-	audio.Install()      // lets us run audio
-	dialog.Install()     // lets us show native dialogs
-	font.Install()       // lets us load fonts from popular file formats
-	image.Install()      // lets us load bitmap images from popular file formats
-	primitives.Install() // lets us use some 2d graphics primitives
-	ttf.Install()        // lets us use true type fonts
+	// Initialize SDL2
+	err := sdl.Init(sdl.INIT_VIDEO | sdl.INIT_AUDIO)
+	if err != nil {
+		logrus.WithError(err).Error("Initializing SDL2")
+	}
+	defer sdl.Quit()
+
+	// Initialize SDL2 TTF Library
+	if err = ttf.Init(); err != nil {
+		logrus.WithError(err).Error("Initializing SDL2_TTF")
+	}
+
+	// CREATE CONTEXT
+	//   i.e. an sdl window + renderer at 800px x 600px
+	Window, Renderer, err = sdl.CreateWindowAndRenderer(
+		800, 600, sdl.WINDOW_RESIZABLE|sdl.WINDOW_INPUT_FOCUS)
+	if err != nil {
+		logrus.WithError(err).Error("Creating window and renderer")
+	}
+	defer Renderer.Destroy()
+	defer Window.Destroy()
+
+	// CONFIGURE CONTEXT
+	Window.SetTitle("Fauxbox")
+	Width, Height = Window.GetSize()
 
 	// LOAD RESOURCES
 	load()
 
-	// CREATE CONTEXT
-	//   i.e. an allegro 'display' at 800px x 600px
-	allegro.SetNewDisplayFlags(allegro.WINDOWED)
-	var err error
-	display, err = allegro.CreateDisplay(800, 600)
-	if err != nil {
-		logrus.WithError(err).Error("Creating allegro display")
-	}
-	defer display.Destroy()
-
-	Width = display.Width()
-	Height = display.Height()
-
-	// CONFIGURE CONTEXT
-	display.SetWindowTitle("Fauxbox") // set a title
-
-	// CREATE EVENT QUEUE
-	eventQueue, err := allegro.CreateEventQueue()
-	if err != nil {
-		logrus.WithError(err).Error("Creating event queue")
-	}
-	defer eventQueue.Destroy()
-
-	// REGISTER EVENT SOURCES
-	checkEventSource := func(es *allegro.EventSource, err error) *allegro.EventSource {
-		if err != nil {
-			logrus.WithError(err).Error("Registering event source")
-		}
-		return es
-	}
-	eventQueue.RegisterEventSource(display.EventSource())
-	eventQueue.RegisterEventSource(checkEventSource(allegro.KeyboardEventSource()))
-	eventQueue.RegisterEventSource(checkEventSource(allegro.MouseEventSource()))
-	eventQueue.RegisterEventSource(allegro.JoystickEventSource())
-
 	// RENDER BLACK SCREEN
-	allegro.ClearToColor(allegro.MapRGB(0, 0, 0))
-	allegro.FlipDisplay()
+	Renderer.SetDrawColor(0, 0, 0, 255)
+	Renderer.Clear()
+	Renderer.Present()
 
 	// PREPARE MAIN LOOP
-	var event allegro.Event
+	var event sdl.Event
 	var thenUpdate,
 		thenDraw,
 		nowUpdate,
@@ -93,12 +72,8 @@ func Fauxbox() {
 	// RUN MAIN LOOP
 	for running {
 		// PROCESS EVENTS
-		for !eventQueue.IsEmpty() {
-			if e, err := eventQueue.GetNextEvent(&event); err == nil {
-				processEvent(e)
-			} else {
-				logrus.WithError(err).Error("Retrieving next event from not-empty queue")
-			}
+		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			processEvent(event)
 		}
 
 		// UPDATE LOGIC
@@ -114,8 +89,7 @@ func Fauxbox() {
 }
 
 func Resized() {
-	Width = display.Width()
-	Height = display.Height()
+	Width, Height = Window.GetSize()
 }
 
 func EndGame() {
