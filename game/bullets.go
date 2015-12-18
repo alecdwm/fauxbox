@@ -5,7 +5,6 @@ import (
 	"github.com/dradtke/go-allegro/allegro"
 	"github.com/dradtke/go-allegro/allegro/primitives"
 	"github.com/go-gl/mathgl/mgl64"
-	"go.owls.io/fauxbox/engine"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,18 +36,18 @@ func (mcb *MouseCannonBullets) Update(dt float64) {
 			continue
 		}
 
-		if mcb.bullets[i].pos.X() < 0 {
-			mcb.bullets[i].pos = mgl64.Vec2{float64(engine.Width), mcb.bullets[i].pos.Y()}
-		}
-		if mcb.bullets[i].pos.Y() < 0 {
-			mcb.bullets[i].pos = mgl64.Vec2{mcb.bullets[i].pos.X(), float64(engine.Height)}
-		}
-		if mcb.bullets[i].pos.X() > float64(engine.Width) {
-			mcb.bullets[i].pos = mgl64.Vec2{0.0, mcb.bullets[i].pos.Y()}
-		}
-		if mcb.bullets[i].pos.Y() > float64(engine.Height) {
-			mcb.bullets[i].pos = mgl64.Vec2{mcb.bullets[i].pos.X(), 0.0}
-		}
+		// if mcb.bullets[i].pos.X() < 0 {
+		// 	mcb.bullets[i].pos = mgl64.Vec2{float64(engine.Width), mcb.bullets[i].pos.Y()}
+		// }
+		// if mcb.bullets[i].pos.Y() < 0 {
+		// 	mcb.bullets[i].pos = mgl64.Vec2{mcb.bullets[i].pos.X(), float64(engine.Height)}
+		// }
+		// if mcb.bullets[i].pos.X() > float64(engine.Width) {
+		// 	mcb.bullets[i].pos = mgl64.Vec2{0.0, mcb.bullets[i].pos.Y()}
+		// }
+		// if mcb.bullets[i].pos.Y() > float64(engine.Height) {
+		// 	mcb.bullets[i].pos = mgl64.Vec2{mcb.bullets[i].pos.X(), 0.0}
+		// }
 
 		mcb.bullets[i].pos = mcb.bullets[i].pos.Add(mcb.bullets[i].vel.Mul(dt))
 	}
@@ -61,7 +60,7 @@ func (mcb *MouseCannonBullets) Draw(dt float64) {
 		}
 
 		primitives.DrawFilledCircle(
-			primitives.Point{float32(mcb.bullets[i].pos.X()), float32(mcb.bullets[i].pos.Y())},
+			primitives.Point{World.X(mcb.bullets[i].pos.X()), World.Y(mcb.bullets[i].pos.Y())},
 			3.0,
 			allegro.MapRGB(255, 0, 0),
 		)

@@ -34,5 +34,5 @@ func (fimg *FauxboxIMG) Load(resPath string, textLog *dialog.TextLog) {
 }
 
 func (fimg *FauxboxIMG) Draw(dt float64) {
-	fimg.logo.Draw(200, 200, allegro.FLIP_NONE)
+	fimg.logo.Draw(World.X(200), World.Y(200), allegro.FLIP_NONE)
 }

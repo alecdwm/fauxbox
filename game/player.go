@@ -84,8 +84,11 @@ func (p *Player) Update(dt float64) {
 	} else if p.RIGHT && !p.LEFT {
 		p.x += p.speed * dt
 	}
+
+	World.TargetX = p.x
+	World.TargetY = p.y
 }
 
 func (p *Player) Draw(dt float64) {
-	primitives.DrawCircle(primitives.Point{float32(p.x), float32(p.y)}, 20.0, allegro.MapRGB(255, 255, 255), 2.0)
+	primitives.DrawCircle(primitives.Point{World.X(p.x), World.Y(p.y)}, 20.0, allegro.MapRGB(255, 255, 255), 2.0)
 }

@@ -35,19 +35,19 @@ func (mc *MouseCannon) ProcessEvent(event interface{}) {
 	switch e := event.(type) {
 	case allegro.MouseButtonDownEvent:
 		if e.Button() == 1 {
-			mc.arm(mgl64.Vec2{float64(e.X()), float64(e.Y())})
+			mc.arm(mgl64.Vec2{World.CamXInt(e.X()), World.CamYInt(e.Y())})
 		} else if e.Button() == 2 {
 			mc.unarm()
 		}
 
 	case allegro.MouseAxesEvent:
 		if mc.isArmed() {
-			mc.aim(mgl64.Vec2{float64(e.X()), float64(e.Y())})
+			mc.aim(mgl64.Vec2{World.CamXInt(e.X()), World.CamYInt(e.Y())})
 		}
 
 	case allegro.MouseButtonUpEvent:
 		if e.Button() == 1 {
-			mc.fire(mc.Bullets, mgl64.Vec2{float64(e.X()), float64(e.Y())})
+			mc.fire(mc.Bullets, mgl64.Vec2{World.CamXInt(e.X()), World.CamYInt(e.Y())})
 		}
 	}
 }
@@ -55,8 +55,8 @@ func (mc *MouseCannon) ProcessEvent(event interface{}) {
 func (mc *MouseCannon) Draw(dt float64) {
 	if mc.armed {
 		primitives.DrawLine(
-			primitives.Point{float32(mc.NextBulletPos.X()), float32(mc.NextBulletPos.Y())},
-			primitives.Point{float32(mc.NextBulletAimPos.X()), float32(mc.NextBulletAimPos.Y())},
+			primitives.Point{World.X(mc.NextBulletPos.X()), World.Y(mc.NextBulletPos.Y())},
+			primitives.Point{World.X(mc.NextBulletAimPos.X()), World.Y(mc.NextBulletAimPos.Y())},
 			allegro.MapRGB(255, 255, 255),
 			1.0,
 		)
