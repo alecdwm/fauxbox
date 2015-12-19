@@ -22,9 +22,9 @@ var (
 )
 
 ////////////////////////////////////////////////////////////////////////////////
-// PUBLIC (BEGIN/RESIZE/END) ///////////////////////////////////////////////////
-///////////////////////////////
-func Fauxbox() {
+// PUBLIC (BEGIN/RESIZE/END) //
+//////////////////////////////
+func Fauxbox(enterState State) {
 	// SDL2 is not designed to work across multiple threads
 	runtime.LockOSThread()
 
@@ -60,7 +60,11 @@ func Fauxbox() {
 	// RENDER BLACK SCREEN
 	Renderer.SetDrawColor(0, 0, 0, 255)
 	Renderer.Clear()
+	firstRender()
 	Renderer.Present()
+
+	// SET ENTRY STATE
+	States.Current = enterState
 
 	// PREPARE MAIN LOOP
 	var event sdl.Event

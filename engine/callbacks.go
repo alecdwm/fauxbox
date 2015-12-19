@@ -7,8 +7,8 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////
-// LOADER //////////////////////////////////////////////////////////////////////
-////////////
+// LOADER //
+///////////
 
 type Loader interface {
 	Load(resourcePath string)
@@ -31,8 +31,62 @@ func load() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// PROCESS EVENTS //////////////////////////////////////////////////////////////
-////////////////////
+// FIRSTRENDER //
+////////////////
+
+type FirstRenderJumper interface {
+	FirstRender()
+}
+
+func firstRender() {
+	for _, system := range systems {
+		if firstRenderJumper, ok := system.(FirstRenderJumper); ok {
+			firstRenderJumper.FirstRender()
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// STATE ENTRY //
+////////////////
+
+type StateEntryReactor interface {
+	StateEntry()
+}
+
+func stateEntry() {
+	for _, system := range systems {
+		if !States.SystemInCurrentState(system) {
+			continue
+		}
+		if stateEntryReactor, ok := system.(StateEntryReactor); ok {
+			stateEntryReactor.StateEntry()
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// STATE EXIT //
+///////////////
+
+type StateExitReactor interface {
+	StateExit()
+}
+
+func stateExit() {
+	for _, system := range systems {
+		if !States.SystemInCurrentState(system) {
+			continue
+		}
+		if stateExitReactor, ok := system.(StateExitReactor); ok {
+			stateExitReactor.StateExit()
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PROCESS EVENTS //
+///////////////////
 
 type EventProcessor interface {
 	ProcessEvent(event sdl.Event)
@@ -41,6 +95,9 @@ type EventProcessor interface {
 func processEvent(event sdl.Event) {
 	CallEventProcessors := func(event sdl.Event) {
 		for _, system := range systems {
+			if !States.SystemInCurrentState(system) {
+				continue
+			}
 			if eventProcessor, ok := system.(EventProcessor); ok {
 				eventProcessor.ProcessEvent(event)
 			}
@@ -50,6 +107,7 @@ func processEvent(event sdl.Event) {
 	switch e := event.(type) {
 	case *sdl.QuitEvent:
 		CallEventProcessors(event)
+		stateExit()
 		EndGame()
 
 	case *sdl.WindowEvent:
@@ -64,8 +122,8 @@ func processEvent(event sdl.Event) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// UPDATE //////////////////////////////////////////////////////////////////////
-////////////
+// UPDATE //
+///////////
 
 type Updater interface {
 	Update(dt float64)
@@ -75,6 +133,9 @@ func update(dt float64) {
 	FPS = 1.0 / dt
 
 	for _, system := range systems {
+		if !States.SystemInCurrentState(system) {
+			continue
+		}
 		if updater, ok := system.(Updater); ok {
 			updater.Update(dt)
 		}
@@ -82,8 +143,8 @@ func update(dt float64) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// DRAW ////////////////////////////////////////////////////////////////////////
-//////////
+// DRAW //
+/////////
 
 type Drawer interface {
 	Draw(dt float64)
@@ -94,6 +155,9 @@ func draw(dt float64) {
 	Renderer.Clear()
 
 	for _, system := range systems {
+		if !States.SystemInCurrentState(system) {
+			continue
+		}
 		if drawer, ok := system.(Drawer); ok {
 			drawer.Draw(dt)
 		}

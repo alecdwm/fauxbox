@@ -32,8 +32,6 @@ build-osx:
 	@mkdir -p $(OSXAPP)/Contents/Resources
 	@mv $(OSXAPP)/Contents/MacOS/resources/icons $(OSXAPP)/Contents/Resources
 	@mv $(OSXAPP)/Contents/MacOS/resources/Info.plist $(OSXAPP)/Contents
-	# @mkdir -p $(OSXAPP)/Contents/Frameworks
-	# @cp $(FAUXPATH)/lib/darwin/* $(OSXAPP)/Contents/Frameworks/
 
 run-osx-dev:
 	@echo "Running fauxbox.app (dev)"

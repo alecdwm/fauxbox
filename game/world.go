@@ -1,87 +1,71 @@
 package game
 
-import "go.owls.io/fauxbox/engine"
+import (
+	"github.com/go-gl/mathgl/mgl64"
+	"github.com/veandco/go-sdl2/sdl"
+	"go.owls.io/fauxbox/engine"
+)
 
 ////////////////////////////////////////////////////////////////////////////////
-// SYSTEM //////////////////////////////////////////////////////////////////////
-////////////
+// SYSTEM //
+///////////
 
-type GameWorld struct {
-	CameraX float64
-	CameraY float64
-	TargetX float64
-	TargetY float64
+type World struct {
+	Camera Camera
+
+	Objects []Object
 }
 
-var World GameWorld
+var GameWorld World
 
 func init() {
-	engine.Register(&World)
+	engine.Register(&GameWorld)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// CALLBACKS ///////////////////////////////////////////////////////////////////
-///////////////
+// STATES //
+///////////
 
-func (w *GameWorld) Update(dt float64) {
-	w.CameraX += (w.TargetX - w.CameraX) * dt
-	w.CameraY += (w.TargetY - w.CameraY) * dt
-}
+var WorldStates map[engine.State]bool = map[engine.State]bool{INGAME: true}
 
-func (w *GameWorld) Draw(dt float64) {
-	// Debugging camera location
-	// engine.Renderer.SetDrawColor(255, 0, 255, 255)
-	// engine.Renderer.DrawPoint(int(w.CameraX), int(w.CameraY))
+func (w *World) States() map[engine.State]bool {
+	return WorldStates
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS ///////////////////////////////////////////////////////////////////
-///////////////
+// CALLBACKS //
+//////////////
+
+func (w *World) StateEntry() {
+	w.Objects = append(w.Objects, &Senti{color: sdl.Color{255, 255, 255, 255}, speed: 150, player: true})
+	engine.Register(w.Objects[len(w.Objects)-1])
+	w.Objects[len(w.Objects)-1].(*Senti).StateEntry()
+}
+
+func (w *World) Update(dt float64) {
+
+}
+
+func (w *World) Render(dt float64) {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS //
+//////////////
 
 // Convert world-space coordinate into screen-space coordinate
-func (w *GameWorld) X(worldX float64) (screenX float32) {
-	screenX = float32(worldX-w.CameraX) + float32(engine.Width/2)
-	return screenX
+func (w *World) Pos(worldPos mgl64.Vec2) (renderPos mgl64.Vec2) {
+	renderPos = worldPos.
+		Sub(w.Camera.Pos).
+		Add(mgl64.Vec2{float64(engine.Width / 2), float64(engine.Height / 2)})
+	return renderPos
 }
 
-// Convert world-space coordinate into screen-space coordinate
-func (w *GameWorld) Y(worldY float64) (screenY float32) {
-	screenY = float32(worldY-w.CameraY) + float32(engine.Height/2)
-	return screenY
-}
-
-// Convert screen-space coordinate into world-space coordinate
-func (w *GameWorld) CamX(cameraX float32) (worldX float64) {
-	worldX = float64(cameraX) + w.CameraX - float64(engine.Width/2)
-	return worldX
-}
-
-// Convert screen-space coordinate into world-space coordinate
-func (w *GameWorld) CamY(cameraY float32) (worldY float64) {
-	worldY = float64(cameraY) + w.CameraY - float64(engine.Height/2)
-	return worldY
-}
-
-// Convert screen-space coordinate into world-space coordinate
-func (w *GameWorld) CamXInt(cameraX int) (worldX float64) {
-	worldX = float64(cameraX) + w.CameraX - float64(engine.Width/2)
-	return worldX
-}
-
-// Convert screen-space coordinate into world-space coordinate
-func (w *GameWorld) CamYInt(cameraY int) (worldY float64) {
-	worldY = float64(cameraY) + w.CameraY - float64(engine.Height/2)
-	return worldY
-}
-
-// Convert screen-space coordinate into world-space coordinate
-func (w *GameWorld) CamXInt32(cameraX int32) (worldX float64) {
-	worldX = float64(cameraX) + w.CameraX - float64(engine.Width/2)
-	return worldX
-}
-
-// Convert screen-space coordinate into world-space coordinate
-func (w *GameWorld) CamYInt32(cameraY int32) (worldY float64) {
-	worldY = float64(cameraY) + w.CameraY - float64(engine.Height/2)
-	return worldY
+// Convert screen-space coordinates into world-space coordinates
+func (w *World) Ray(renderPos mgl64.Vec2) (worldPos mgl64.Vec2) {
+	worldPos = renderPos.
+		Add(w.Camera.Pos).
+		Sub(mgl64.Vec2{float64(engine.Width / 2), float64(engine.Height / 2)})
+	return renderPos
 }
