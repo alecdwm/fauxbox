@@ -67,5 +67,5 @@ func (w *World) Ray(renderPos mgl64.Vec2) (worldPos mgl64.Vec2) {
 	worldPos = renderPos.
 		Add(w.Camera.Pos).
 		Sub(mgl64.Vec2{float64(engine.Width / 2), float64(engine.Height / 2)})
-	return renderPos
+	return worldPos
 }

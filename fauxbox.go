@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	game.Attach()                 // Attach game files
-	engine.Fauxbox(game.MAINMENU) // Run Fauxbox
+	game.Attach()               // Attach game files
+	engine.Fauxbox(game.INGAME) // Run Fauxbox
 }

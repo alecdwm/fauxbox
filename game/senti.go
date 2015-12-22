@@ -1,9 +1,6 @@
 package game
 
 import (
-	"fmt"
-	"math"
-
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/veandco/go-sdl2/sdl"
 	"go.owls.io/fauxbox/engine"
@@ -15,12 +12,15 @@ import (
 
 type Senti struct {
 	pos       mgl64.Vec2
+	vel       mgl64.Vec2
 	target    mgl64.Vec2
 	direction Direction
 
-	color  sdl.Color
-	speed  float64
-	player bool
+	color sdl.Color
+	speed float64
+
+	player    bool
+	networked bool
 
 	posRect    *sdl.Rect
 	targetRect *sdl.Rect
@@ -39,33 +39,15 @@ func (s *Senti) StateEntry() {
 	s.targetRect = &sdl.Rect{0, 0, 6, 6}
 }
 
-func (s *Senti) ProcessEvent(event sdl.Event) {
-	switch e := event.(type) {
-	case *sdl.KeyDownEvent:
-		switch e.Keysym.Sym {
-		case sdl.K_w, sdl.K_UP:
-			s.MoveTarget(0, -100)
-
-		case sdl.K_a, sdl.K_LEFT:
-			s.MoveTarget(-100, 0)
-
-		case sdl.K_s, sdl.K_DOWN:
-			s.MoveTarget(0, 100)
-
-		case sdl.K_d, sdl.K_RIGHT:
-			s.MoveTarget(100, 0)
-		}
-	}
-}
-
 func (s *Senti) Update(dt float64) {
 	// Use dir for facing the sprite
-	dir := math.Acos(s.pos.Normalize().Dot(s.target.Normalize()))
-	fmt.Println(dir)
+	// fmt.Printf("%v\n", s.target.Sub(s.pos).Normalize())
+	// dir := math.Acos(s.target.Sub(s.pos).Normalize().Dot(mgl64.Vec2{0, 1}))
+	// fmt.Println(dir)
 
-	s.pos = s.pos.Add(s.target.Sub(s.pos).Mul( /*s.speed * */ dt))
-
-	fmt.Println(s.pos.X(), s.pos.Y())
+	if s.vel.X() != 0 || s.vel.Y() != 0 {
+		s.pos = s.pos.Add(s.vel.Mul(dt))
+	}
 
 	s.posRect.X = int32(GameWorld.Pos(s.pos).X()) - s.posRect.W/2
 	s.posRect.Y = int32(GameWorld.Pos(s.pos).Y()) - s.posRect.H/2
@@ -88,12 +70,28 @@ func (s *Senti) Draw(dt float64) {
 // FUNCTIONS //
 //////////////
 
-func (s *Senti) MoveTarget(targetX, targetY float64) {
-	s.target = s.target.Add(mgl64.Vec2{targetX, targetY})
+func (s *Senti) IsPlayer() bool {
+	return s.player
 }
 
-func (s *Senti) SetTarget(targetX, targetY float64) {
-	s.target = mgl64.Vec2{targetX, targetY}
+func (s *Senti) IsNetworked() bool {
+	return s.networked
+}
+
+func (s *Senti) SetPosition(newPos mgl64.Vec2) {
+	s.pos = newPos
+}
+
+func (s *Senti) SetVelocity(newVel mgl64.Vec2) {
+	s.vel = newVel
+}
+
+func (s *Senti) SetTarget(newTarget mgl64.Vec2) {
+	s.target = newTarget
+}
+
+func (s *Senti) Speed() float64 {
+	return s.speed
 }
 
 func (s *Senti) SetSpeed(speed float64) {

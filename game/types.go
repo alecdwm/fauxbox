@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/veandco/go-sdl2/sdl"
 	"go.owls.io/fauxbox/engine"
 )
 
@@ -35,9 +36,17 @@ type Transformed interface {
 }
 
 type Controllable interface {
-	Transformed
+	IsPlayer() bool
+	IsNetworked() bool
 
-	Move(mgl64.Vec2)
+	SetPosition(newPos mgl64.Vec2)
+	SetVelocity(newVel mgl64.Vec2)
+	SetTarget(newTarget mgl64.Vec2)
+	Speed() float64
+	SetSpeed(speed float64)
+	SetColor(color sdl.Color)
+
+	// Move(mgl64.Vec2)
 }
 
 type RadiusCollidable interface {

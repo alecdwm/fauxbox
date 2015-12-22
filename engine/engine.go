@@ -16,6 +16,8 @@ var (
 	Height   int
 	Window   *sdl.Window
 	Renderer *sdl.Renderer
+	Keyboard []uint8
+	Mouse    MouseState
 
 	// Private
 	running bool = true
@@ -63,8 +65,10 @@ func Fauxbox(enterState State) {
 	firstRender()
 	Renderer.Present()
 
-	// SET ENTRY STATE
+	// SETUP ENTRY STATE
 	States.Current = enterState
+	stateEntry()
+	Keyboard = sdl.GetKeyboardState()
 
 	// PREPARE MAIN LOOP
 	var event sdl.Event
@@ -77,6 +81,10 @@ func Fauxbox(enterState State) {
 	for running {
 		// PROCESS EVENTS
 		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			sdl.PumpEvents() // Update engine.Keyboard
+			Mouse.X,
+				Mouse.Y,
+				Mouse.State = sdl.GetMouseState() // Update engine.Mouse
 			processEvent(event)
 		}
 
