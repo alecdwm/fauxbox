@@ -81,10 +81,15 @@ func Fauxbox(enterState State) {
 	for running {
 		// PROCESS EVENTS
 		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			sdl.PumpEvents() // Update engine.Keyboard
-			Mouse.X,
-				Mouse.Y,
-				Mouse.State = sdl.GetMouseState() // Update engine.Mouse
+			switch event.(type) {
+			case *sdl.KeyDownEvent, *sdl.KeyUpEvent:
+				sdl.PumpEvents() // Update engine.Keyboard
+
+			case *sdl.MouseButtonEvent, *sdl.MouseMotionEvent, *sdl.MouseWheelEvent:
+				Mouse.X,
+					Mouse.Y,
+					Mouse.State = sdl.GetMouseState() // Update engine.Mouse
+			}
 			processEvent(event)
 		}
 
