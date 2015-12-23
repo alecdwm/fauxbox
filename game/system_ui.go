@@ -65,8 +65,14 @@ func (ui *UI) Load(resPath string) {
 
 func (ui *UI) Update(dt float64) {
 	var err error
+	if ui.fpsCounterText != nil {
+		ui.fpsCounterText.Free()
+	}
 	if ui.fpsCounterText, err = ui.font.RenderUTF8_Solid(fmt.Sprintf("%.1f", engine.FPS), sdl.Color{255, 255, 255, 255}); err != nil {
 		logrus.WithError(err).Error("Rendering text")
+	}
+	if ui.fpsCounterTex != nil {
+		ui.fpsCounterTex.Destroy()
 	}
 	if ui.fpsCounterTex, err = engine.Renderer.CreateTextureFromSurface(ui.fpsCounterText); err != nil {
 		logrus.WithError(err).Error("Texture from surface")
