@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/veandco/go-sdl2/sdl"
@@ -14,12 +15,13 @@ import (
 ///////////
 
 type UI struct {
-	font           *ttf.Font
-	fpsCounterText *sdl.Surface
-	fpsCounterTex  *sdl.Texture
-	fpsCounterObj  *sdl.Rect
-	helloWorldTex  *sdl.Texture
-	helloWorldObj  *sdl.Rect
+	font                 *ttf.Font
+	fpsCounterLastUpdate time.Time
+	fpsCounterText       *sdl.Surface
+	fpsCounterTex        *sdl.Texture
+	fpsCounterObj        *sdl.Rect
+	helloWorldTex        *sdl.Texture
+	helloWorldObj        *sdl.Rect
 }
 
 func init() {
@@ -65,20 +67,23 @@ func (ui *UI) Load(resPath string) {
 
 func (ui *UI) Update(dt float64) {
 	var err error
-	if ui.fpsCounterText != nil {
-		ui.fpsCounterText.Free()
+	if time.Now().Sub(ui.fpsCounterLastUpdate).Seconds() > time.Second.Seconds()*0.3 {
+		if ui.fpsCounterText != nil {
+			ui.fpsCounterText.Free()
+		}
+		if ui.fpsCounterText, err = ui.font.RenderUTF8_Solid(fmt.Sprintf("%.1f FPS", engine.FPS), sdl.Color{255, 255, 255, 255}); err != nil {
+			logrus.WithError(err).Error("Rendering text")
+		}
+		if ui.fpsCounterTex != nil {
+			ui.fpsCounterTex.Destroy()
+		}
+		if ui.fpsCounterTex, err = engine.Renderer.CreateTextureFromSurface(ui.fpsCounterText); err != nil {
+			logrus.WithError(err).Error("Texture from surface")
+		}
+		ui.fpsCounterObj.W = ui.fpsCounterText.W
+		ui.fpsCounterObj.H = ui.fpsCounterText.H
+		ui.fpsCounterLastUpdate = time.Now()
 	}
-	if ui.fpsCounterText, err = ui.font.RenderUTF8_Solid(fmt.Sprintf("%.1f", engine.FPS), sdl.Color{255, 255, 255, 255}); err != nil {
-		logrus.WithError(err).Error("Rendering text")
-	}
-	if ui.fpsCounterTex != nil {
-		ui.fpsCounterTex.Destroy()
-	}
-	if ui.fpsCounterTex, err = engine.Renderer.CreateTextureFromSurface(ui.fpsCounterText); err != nil {
-		logrus.WithError(err).Error("Texture from surface")
-	}
-	ui.fpsCounterObj.W = ui.fpsCounterText.W
-	ui.fpsCounterObj.H = ui.fpsCounterText.H
 }
 
 func (ui *UI) Draw(dt float64) {
