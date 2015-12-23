@@ -1,74 +1,77 @@
 package game
 
-// import "github.com/go-gl/mathgl/mgl64"
+import (
+	"github.com/go-gl/mathgl/mgl64"
+	"github.com/veandco/go-sdl2/sdl"
+	"go.owls.io/fauxbox/engine"
+)
 
-// ////////////////////////////////////////////////////////////////////////////////
-// // ENT //
-// ////////
+////////////////////////////////////////////////////////////////////////////////
+// ENT //
+////////
 
-// type Bullet struct {
-// 	Entity
+type Bullet struct {
+	pos mgl64.Vec2
+	vel mgl64.Vec2
 
-// 	active    bool
-// 	livedtime float64
-// 	lifetime  float64
+	color sdl.Color
 
-// 	pos mgl64.Vec2
-// 	vel mgl64.Vec2
-// }
+	active    bool
+	lifetime  float64
+	livedtime float64
 
-// ////////////////////////////////////////////////////////////////////////////////
-// // GETTER //
-// ///////////
+	posRect *sdl.Rect
+}
 
-// type BulletEnt interface {
-// 	Get() *Bullet
-// }
+func (b *Bullet) ID() uint {
+	return 1
+}
 
-// func (b *Bullet) Get() *Bullet {
-// 	return b
-// }
+////////////////////////////////////////////////////////////////////////////////
+// CALLBACKS //
+//////////////
 
-// var BulletIDs []uint
+func (b *Bullet) Update(dt float64) {
+	if !b.active {
+		return
+	}
 
-// func (s *State) NewBullet() *Bullet {
-// 	newBullet := &Bullet{
-// 		Entity{ID: s.GetNextEntID()},
+	b.livedtime += dt
+	if b.livedtime > b.lifetime {
+		b.active = false
+		return
+	}
 
-// 		false,
-// 		0,
-// 		0,
+	if b.vel.X() != 0 || b.vel.Y() != 0 {
+		b.pos = b.pos.Add(b.vel.Mul(dt))
+	}
 
-// 		mgl64.Vec2{},
-// 		mgl64.Vec2{},
-// 	}
+	b.posRect.X = int32(GameWorld.Pos(b.pos).X()) - b.posRect.W/2
+	b.posRect.Y = int32(GameWorld.Pos(b.pos).Y()) - b.posRect.H/2
+}
 
-// 	BulletIDs = append(BulletIDs, newBullet.ID)
+func (b *Bullet) Draw(dt float64) {
+	if !b.active {
+		return
+	}
 
-// 	s.Ents[newBullet.ID] = newBullet
+	engine.Renderer.SetDrawColor(b.color.R, b.color.G, b.color.B, b.color.A)
+	engine.Renderer.DrawRect(b.posRect)
+}
 
-// 	return newBullet
-// }
+////////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS //
+//////////////
 
-// func (s *State) GetBullets() (bulletEnts []*Bullet) {
-// 	for _, id := range BulletIDs {
-// 		bulletEnts = append(bulletEnts, s.Ents[id].(Bullet))
-// 	}
-// 	return bulletEnts
-// }
+func (b *Bullet) Fire(pos, vel mgl64.Vec2, color sdl.Color, lifetime float64) {
+	if b.active {
+		return
+	}
 
-// ////////////////////////////////////////////////////////////////////////////////
-// // FUNCTIONS //
-// //////////////
-
-// func (b *Bullet) Fire(pos, vel mgl64.Vec2, lifetime float64) {
-// 	if b.active {
-// 		return
-// 	}
-
-// 	b.active = true
-// 	b.livedtime = 0
-// 	b.lifetime = lifetime
-// 	b.pos = pos
-// 	b.vel = vel
-// }
+	b.pos = pos
+	b.vel = vel
+	b.color = color
+	b.active = true
+	b.lifetime = lifetime
+	b.livedtime = 0
+}

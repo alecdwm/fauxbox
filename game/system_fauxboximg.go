@@ -1,49 +1,63 @@
 package game
 
-// import (
-// 	"github.com/Sirupsen/logrus"
-// 	"github.com/veandco/go-sdl2/sdl"
-// 	"github.com/veandco/go-sdl2/sdl_image"
-// 	"go.owls.io/fauxbox/engine"
-// )
+import (
+	"github.com/Sirupsen/logrus"
+	"github.com/go-gl/mathgl/mgl64"
+	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/sdl_image"
+	"go.owls.io/fauxbox/engine"
+)
 
-// ////////////////////////////////////////////////////////////////////////////////
-// // SYSTEM //
-// ///////////
+////////////////////////////////////////////////////////////////////////////////
+// SYSTEM //
+///////////
 
-// type FauxboxIMG struct {
-// 	logoTex *sdl.Texture
-// 	logoObj sdl.Rect
-// }
+type FauxboxIMG struct {
+	logoTex *sdl.Texture
+	logoObj sdl.Rect
+}
 
-// func init() {
-// 	engine.Register(&FauxboxIMG{})
-// }
+func init() {
+	engine.Register(&FauxboxIMG{})
+}
 
-// ////////////////////////////////////////////////////////////////////////////////
-// // CALLBACKS //
-// //////////////
+////////////////////////////////////////////////////////////////////////////////
+// STATES //
+///////////
 
-// func (fimg *FauxboxIMG) Load(resPath string) {
-// 	// BITMAPS
-// 	surface, err := img.Load(resPath + "/fauxbox.tga")
-// 	if err != nil {
-// 		logrus.WithError(err).Error("Loading bitmap")
-// 	}
+var FauxboxIMGStates map[engine.State]bool = map[engine.State]bool{INGAME: true}
 
-// 	if fimg.logoTex, err = engine.Renderer.CreateTextureFromSurface(surface); err != nil {
-// 		logrus.WithError(err).Error("Texture from surface")
-// 	}
-// 	surface.Free()
+func (fimg *FauxboxIMG) States() map[engine.State]bool {
+	return FauxboxIMGStates
+}
 
-// 	fimg.logoObj = sdl.Rect{int32(World.X(200)), int32(World.Y(200)), 256, 256}
-// }
+////////////////////////////////////////////////////////////////////////////////
+// CALLBACKS //
+//////////////
 
-// func (fimg *FauxboxIMG) Update(dt float64) {
-// 	fimg.logoObj.X = int32(World.X(200))
-// 	fimg.logoObj.Y = int32(World.Y(200))
-// }
+func (fimg *FauxboxIMG) Load(resPath string) {
+	// BITMAPS
+	surface, err := img.Load(resPath + "/fauxbox.tga")
+	if err != nil {
+		logrus.WithError(err).Error("Loading bitmap")
+	}
 
-// func (fimg *FauxboxIMG) Draw(dt float64) {
-// 	engine.Renderer.Copy(fimg.logoTex, nil, &fimg.logoObj)
-// }
+	if fimg.logoTex, err = engine.Renderer.CreateTextureFromSurface(surface); err != nil {
+		logrus.WithError(err).Error("Texture from surface")
+	}
+	surface.Free()
+
+	fimg.logoObj = sdl.Rect{
+		int32(GameWorld.Pos(mgl64.Vec2{200, 0}).X()),
+		int32(GameWorld.Pos(mgl64.Vec2{0, 200}).Y()),
+		256, 256}
+}
+
+func (fimg *FauxboxIMG) Update(dt float64) {
+	fimg.logoObj.X = int32(GameWorld.Pos(mgl64.Vec2{200, 0}).X())
+	fimg.logoObj.Y = int32(GameWorld.Pos(mgl64.Vec2{0, 200}).Y())
+}
+
+func (fimg *FauxboxIMG) Draw(dt float64) {
+	engine.Renderer.Copy(fimg.logoTex, nil, &fimg.logoObj)
+}

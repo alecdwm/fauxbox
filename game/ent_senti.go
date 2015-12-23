@@ -59,7 +59,8 @@ func (s *Senti) Update(dt float64) {
 }
 
 func (s *Senti) Draw(dt float64) {
-	engine.Renderer.SetDrawColor(255, 255, 255, 255)
+	engine.Renderer.SetDrawColor(s.color.R, s.color.G, s.color.B, s.color.A)
+	// engine.Renderer.SetDrawColor(255, 255, 255, 255)
 	engine.Renderer.DrawRect(s.posRect)
 
 	engine.Renderer.SetDrawColor(255, 0, 0, 255)
