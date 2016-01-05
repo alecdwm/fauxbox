@@ -1,6 +1,10 @@
 package engine
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/Sirupsen/logrus"
+	"github.com/kardianos/osext"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 // LOADER //
@@ -12,8 +16,11 @@ type Loader interface {
 
 func load() {
 	// DETERMINE RESOURCE PATH
-	basePath := sdl.GetBasePath()
-	resPath := basePath + "resources"
+	execPath, err := osext.ExecutableFolder()
+	if err != nil {
+		logrus.WithError(err).Error("Getting executable's path")
+	}
+	resPath := execPath + "/resources"
 
 	// CALL LOADERS
 	for _, system := range systems {
